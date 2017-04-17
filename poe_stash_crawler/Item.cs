@@ -6,9 +6,11 @@ using System.Threading.Tasks;
 
 namespace poe_stash_crawler
 {
+    [Serializable]
     public class Item
     {
        
+
         public bool verified { get; set; }
         public int w { get; set; }
         public int h { get; set; }

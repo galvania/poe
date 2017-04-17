@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace poe_stash_crawler
 {
+    [Serializable]
     public class Properties
     {
         public int ID { get; set; }

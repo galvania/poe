@@ -6,6 +6,10 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.Entity;
+using System.IO;
+using System.Xml.Serialization;
+using System.Xml;
+
 namespace poe_stash_crawler
 {
     public class Crawler
@@ -24,21 +28,28 @@ namespace poe_stash_crawler
                     content = client.DownloadString("http://www.pathofexile.com/api/public-stash-tabs");
                     int i = 0;
                     var o = JObject.Parse(content);
+                    object stlock= new object();
+                    List<JToken> results;
                     while (o["next_change_id"] != null)
                     {
-                        IList<JToken> results = o["stashes"].Children().ToList();
-                        results.ToList().Take(20).ToList().ForEach(j => { st.Add(j.ToObject<Stash>());Console.WriteLine(i++); });
+                        new Task(()=> {
+                            lock (stlock)
+                            {
+                                results = o["stashes"].Children().ToList();
+                                results.ToList().ForEach(j => { st.Add(j.ToObject<Stash>()); Console.WriteLine(i++); });
+                            }
+                        }).Start();
 
-                        db.Stashes.AddRange(st);
-                        db.SaveChanges();
-                        break;
                         content = client.DownloadString("http://www.pathofexile.com/api/public-stash-tabs?id=" + o["next_change_id"].ToString());
                         o = JObject.Parse(content);
+                        
                     }
                 }
             }
             Console.WriteLine();
 
         }
+
+
     }
 }
